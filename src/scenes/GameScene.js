@@ -170,23 +170,23 @@ class GameScene extends Phaser.Scene {
     createVirtualJoystick() {
         const width = this.scale.width;
         const height = this.scale.height;
-        
+
         // 摇杆位置 - 左下角 (竖屏)
         const joystickX = width * 0.22;
         const joystickY = height * 0.88;
-        
+
         // 摇杆底座 - 更大
         this.joystickBase = this.add.circle(joystickX, joystickY, 90, 0x333333, 0.5);
         this.joystickBase.setStrokeStyle(3, 0x666666);
         this.joystickBase.setDepth(100);
         this.joystickBase.setScrollFactor(0);
-        
+
         // 摇杆按钮 - 更大
         this.joystickThumb = this.add.circle(joystickX, joystickY, 45, 0x4ECDC4, 0.8);
         this.joystickThumb.setStrokeStyle(2, 0xFFFFFF);
         this.joystickThumb.setDepth(101);
         this.joystickThumb.setScrollFactor(0);
-        
+
         // 摇杆提示
         this.joystickHint = this.add.text(joystickX, joystickY + 115, '移动', {
             fontSize: '18px',
@@ -194,47 +194,73 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.joystickHint.setDepth(100);
         this.joystickHint.setScrollFactor(0);
-        
-        // 摇杆交互区域 - 更大
+
+        // 摇杆交互区域 - 更大，使用自定义 hit area 支持多点触控
         this.joystickZone = this.add.circle(joystickX, joystickY, 130, 0x000000, 0.01);
         this.joystickZone.setDepth(99);
         this.joystickZone.setScrollFactor(0);
-        this.joystickZone.setInteractive();
-        
-        // 摇杆触摸事件
-        this.joystickZone.on('pointerdown', (pointer) => {
+        this.joystickZone.setInteractive({ draggable: true });
+
+        // 摇杆触摸事件 - 修复多点触控问题
+        this.joystickZone.on('pointerdown', (pointer, localX, localY, event) => {
+            // 阻止默认行为，防止页面滚动
+            if (event) event.stopPropagation();
+
             this.joystick.active = true;
             this.joystick.pointer = pointer;
+            this.joystick.pointerId = pointer.id; // 保存 pointer ID 用于识别
             this.joystick.centerX = joystickX;
             this.joystick.centerY = joystickY;
         });
-        
-        this.input.on('pointermove', (pointer) => {
-            if (this.joystick.active && this.joystick.pointer === pointer) {
+
+        // 使用 zone 自身的 drag 事件，而不是全局 pointermove
+        this.joystickZone.on('pointermove', (pointer, localX, localY, event) => {
+            if (this.joystick.active && this.joystick.pointerId === pointer.id) {
                 const dx = pointer.x - this.joystick.centerX;
                 const dy = pointer.y - this.joystick.centerY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                
+
                 const maxDist = this.joystick.maxDistance;
                 const clampedDist = Math.min(distance, maxDist);
                 const angle = Math.atan2(dy, dx);
-                
+
                 this.joystick.deltaX = Math.cos(angle) * clampedDist;
                 this.joystick.deltaY = Math.sin(angle) * clampedDist;
-                
+
                 this.joystickThumb.x = this.joystick.centerX + this.joystick.deltaX;
                 this.joystickThumb.y = this.joystick.centerY + this.joystick.deltaY;
             }
         });
-        
-        this.input.on('pointerup', (pointer) => {
-            if (this.joystick.pointer === pointer) {
+
+        // 使用 zone 自身的 pointerup，而不是全局事件
+        this.joystickZone.on('pointerup', (pointer, localX, localY, event) => {
+            if (this.joystick.pointerId === pointer.id) {
                 this.joystick.active = false;
                 this.joystick.pointer = null;
+                this.joystick.pointerId = null;
                 this.joystick.deltaX = 0;
                 this.joystick.deltaY = 0;
-                
+
                 // 重置摇杆位置
+                this.tweens.add({
+                    targets: this.joystickThumb,
+                    x: this.joystick.centerX || joystickX,
+                    y: this.joystick.centerY || joystickY,
+                    duration: 150,
+                    ease: 'Power2'
+                });
+            }
+        });
+
+        // 手指滑出区域时也要释放
+        this.joystickZone.on('pointerupoutside', (pointer, localX, localY, event) => {
+            if (this.joystick.pointerId === pointer.id) {
+                this.joystick.active = false;
+                this.joystick.pointer = null;
+                this.joystick.pointerId = null;
+                this.joystick.deltaX = 0;
+                this.joystick.deltaY = 0;
+
                 this.tweens.add({
                     targets: this.joystickThumb,
                     x: this.joystick.centerX || joystickX,
@@ -249,24 +275,24 @@ class GameScene extends Phaser.Scene {
     createShootButton() {
         const width = this.scale.width;
         const height = this.scale.height;
-        
+
         // 射击按钮位置 - 右下角 (竖屏)
         const btnX = width * 0.78;
         const btnY = height * 0.88;
-        
+
         // 射击按钮背景 - 更大
         this.shootBtnBg = this.add.circle(btnX, btnY, 70, 0xFF6B6B, 0.8);
         this.shootBtnBg.setStrokeStyle(3, 0xFFFFFF);
         this.shootBtnBg.setDepth(100);
         this.shootBtnBg.setScrollFactor(0);
-        
+
         // 射击按钮文字 - 更大
         this.shootBtnText = this.add.text(btnX, btnY, '🔫', {
             fontSize: '48px'
         }).setOrigin(0.5);
         this.shootBtnText.setDepth(101);
         this.shootBtnText.setScrollFactor(0);
-        
+
         // 射击提示
         this.shootHint = this.add.text(btnX, btnY + 95, '射击', {
             fontSize: '18px',
@@ -274,23 +300,27 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.shootHint.setDepth(100);
         this.shootHint.setScrollFactor(0);
-        
-        // 射击按钮交互 - 更大
+
+        // 射击按钮交互 - 使用独立的事件，支持多点触控
         this.shootBtnZone = this.add.circle(btnX, btnY, 90, 0x000000, 0.01);
         this.shootBtnZone.setDepth(99);
         this.shootBtnZone.setScrollFactor(0);
         this.shootBtnZone.setInteractive();
-        
-        this.shootBtnZone.on('pointerdown', () => {
+
+        // 点击开始射击
+        this.shootBtnZone.on('pointerdown', (pointer, localX, localY, event) => {
+            // 阻止事件冒泡，防止与其他按钮冲突
+            if (event) event.stopPropagation();
+
             if (!this.isGameOver && this.player.active) {
                 // 向最近敌人射击，或向上射击
                 let targetX = this.player.x;
                 let targetY = this.player.y - 200;
-                
+
                 // 找到最近的敌人
                 let nearestEnemy = null;
                 let nearestDist = Infinity;
-                
+
                 this.enemies.getChildren().forEach(enemy => {
                     if (enemy.active) {
                         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y);
@@ -300,14 +330,14 @@ class GameScene extends Phaser.Scene {
                         }
                     }
                 });
-                
+
                 if (nearestEnemy) {
                     targetX = nearestEnemy.x;
                     targetY = nearestEnemy.y;
                 }
-                
+
                 this.player.fire(targetX, targetY);
-                
+
                 // 按钮按下效果
                 this.tweens.add({
                     targets: this.shootBtnBg,
@@ -322,17 +352,17 @@ class GameScene extends Phaser.Scene {
     createSkillButton() {
         const width = this.scale.width;
         const height = this.scale.height;
-        
+
         // 技能按钮位置 - 射击按钮上方 (竖屏布局)
         const btnX = width * 0.78;
         const btnY = height * 0.72;
-        
+
         // 技能按钮背景 - 更大
         this.skillBtnBg = this.add.circle(btnX, btnY, 55, 0xFFD93D, 0.8);
         this.skillBtnBg.setStrokeStyle(3, 0xFFFFFF);
         this.skillBtnBg.setDepth(100);
         this.skillBtnBg.setScrollFactor(0);
-        
+
         // 技能按钮图标 - 更大
         const skillIcon = this.selectedCharacter.skill.effect === 'slow' ? '🥧' :
                          this.selectedCharacter.skill.effect === 'teleport' ? '💻' :
@@ -340,13 +370,13 @@ class GameScene extends Phaser.Scene {
                          this.selectedCharacter.skill.effect === 'knockback' ? '😺' :
                          this.selectedCharacter.skill.effect === 'aoe' ? '🥤' :
                          this.selectedCharacter.skill.effect === 'blackout' ? '🐛' : '🪨';
-        
+
         this.skillBtnText = this.add.text(btnX, btnY, skillIcon, {
             fontSize: '40px'
         }).setOrigin(0.5);
         this.skillBtnText.setDepth(101);
         this.skillBtnText.setScrollFactor(0);
-        
+
         // 技能提示
         this.skillBtnHint = this.add.text(btnX, btnY + 75, '技能', {
             fontSize: '18px',
@@ -354,28 +384,31 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.skillBtnHint.setDepth(100);
         this.skillBtnHint.setScrollFactor(0);
-        
+
         // 冷却遮罩 - 更大
         this.skillCooldownMask = this.add.arc(btnX, btnY, 55, -90, 270, false, 0x000000, 0.6);
         this.skillCooldownMask.setDepth(102);
         this.skillCooldownMask.setScrollFactor(0);
         this.skillCooldownMask.visible = false;
-        
-        // 技能按钮交互 - 更大
+
+        // 技能按钮交互 - 支持多点触控
         this.skillBtnZone = this.add.circle(btnX, btnY, 75, 0x000000, 0.01);
         this.skillBtnZone.setDepth(99);
         this.skillBtnZone.setScrollFactor(0);
         this.skillBtnZone.setInteractive();
-        
-        this.skillBtnZone.on('pointerdown', () => {
+
+        this.skillBtnZone.on('pointerdown', (pointer, localX, localY, event) => {
+            // 阻止事件冒泡
+            if (event) event.stopPropagation();
+
             if (!this.isGameOver && this.player.active) {
                 let targetX = this.player.x;
                 let targetY = this.player.y - 200;
-                
+
                 // 找到最近的敌人作为目标
                 let nearestEnemy = null;
                 let nearestDist = Infinity;
-                
+
                 this.enemies.getChildren().forEach(enemy => {
                     if (enemy.active) {
                         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y);
@@ -385,14 +418,14 @@ class GameScene extends Phaser.Scene {
                         }
                     }
                 });
-                
+
                 if (nearestEnemy) {
                     targetX = nearestEnemy.x;
                     targetY = nearestEnemy.y;
                 }
-                
+
                 const success = this.player.useSkill(targetX, targetY);
-                
+
                 if (success) {
                     // 按钮按下效果
                     this.tweens.add({
