@@ -69,11 +69,12 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
         
-        this.player = new Player(this, width/2, height * 0.75, this.selectedCharacter);
+        // 玩家在底部中央（竖屏）
+        this.player = new Player(this, width/2, height * 0.65, this.selectedCharacter);
         this.player.setDepth(10);
         
-        // 出生特效
-        const spawnEffect = this.add.circle(this.player.x, this.player.y, 50, 0xFFFFFF, 0.8);
+        // 出生特效 - 更大
+        const spawnEffect = this.add.circle(this.player.x, this.player.y, 70, 0xFFFFFF, 0.8);
         this.tweens.add({
             targets: spawnEffect,
             scale: 2,
@@ -93,19 +94,19 @@ class GameScene extends Phaser.Scene {
         const allChars = getAllCharacters();
         const enemyChars = allChars.filter(c => c.id !== this.selectedCharacter.id);
         
-        // 随机位置生成敌人（上半部分）
+        // 随机位置生成敌人（上半部分 - 竖屏布局）
         enemyChars.forEach((char, index) => {
-            const col = index % 3;
-            const row = Math.floor(index / 3);
-            const x = width * 0.15 + col * (width * 0.35) + Phaser.Math.Between(-30, 30);
-            const y = height * 0.12 + row * (height * 0.15) + Phaser.Math.Between(-20, 20);
+            const col = index % 2;
+            const row = Math.floor(index / 2);
+            const x = width * 0.25 + col * (width * 0.5) + Phaser.Math.Between(-40, 40);
+            const y = height * 0.12 + row * (height * 0.12) + Phaser.Math.Between(-20, 20);
             
             const enemy = new Enemy(this, x, y, char, this.player);
             enemy.setDepth(10);
             this.enemies.add(enemy);
             
             // 出生特效
-            const spawnEffect = this.add.circle(x, y, 40, char.color, 0.6);
+            const spawnEffect = this.add.circle(x, y, 50, char.color, 0.6);
             this.tweens.add({
                 targets: spawnEffect,
                 scale: 1.5,
@@ -170,32 +171,32 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
         
-        // 摇杆位置 - 左下角
-        const joystickX = width * 0.18;
-        const joystickY = height * 0.82;
+        // 摇杆位置 - 左下角 (竖屏)
+        const joystickX = width * 0.22;
+        const joystickY = height * 0.88;
         
-        // 摇杆底座
-        this.joystickBase = this.add.circle(joystickX, joystickY, 70, 0x333333, 0.5);
+        // 摇杆底座 - 更大
+        this.joystickBase = this.add.circle(joystickX, joystickY, 90, 0x333333, 0.5);
         this.joystickBase.setStrokeStyle(3, 0x666666);
         this.joystickBase.setDepth(100);
         this.joystickBase.setScrollFactor(0);
         
-        // 摇杆按钮
-        this.joystickThumb = this.add.circle(joystickX, joystickY, 35, 0x4ECDC4, 0.8);
+        // 摇杆按钮 - 更大
+        this.joystickThumb = this.add.circle(joystickX, joystickY, 45, 0x4ECDC4, 0.8);
         this.joystickThumb.setStrokeStyle(2, 0xFFFFFF);
         this.joystickThumb.setDepth(101);
         this.joystickThumb.setScrollFactor(0);
         
         // 摇杆提示
-        this.joystickHint = this.add.text(joystickX, joystickY + 90, '移动', {
-            fontSize: '14px',
+        this.joystickHint = this.add.text(joystickX, joystickY + 115, '移动', {
+            fontSize: '18px',
             fill: '#aaaaaa'
         }).setOrigin(0.5);
         this.joystickHint.setDepth(100);
         this.joystickHint.setScrollFactor(0);
         
-        // 摇杆交互区域
-        this.joystickZone = this.add.circle(joystickX, joystickY, 100, 0x000000, 0.01);
+        // 摇杆交互区域 - 更大
+        this.joystickZone = this.add.circle(joystickX, joystickY, 130, 0x000000, 0.01);
         this.joystickZone.setDepth(99);
         this.joystickZone.setScrollFactor(0);
         this.joystickZone.setInteractive();
@@ -249,33 +250,33 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
         
-        // 射击按钮位置 - 右下角
-        const btnX = width * 0.82;
-        const btnY = height * 0.75;
+        // 射击按钮位置 - 右下角 (竖屏)
+        const btnX = width * 0.78;
+        const btnY = height * 0.88;
         
-        // 射击按钮背景
-        this.shootBtnBg = this.add.circle(btnX, btnY, 55, 0xFF6B6B, 0.8);
+        // 射击按钮背景 - 更大
+        this.shootBtnBg = this.add.circle(btnX, btnY, 70, 0xFF6B6B, 0.8);
         this.shootBtnBg.setStrokeStyle(3, 0xFFFFFF);
         this.shootBtnBg.setDepth(100);
         this.shootBtnBg.setScrollFactor(0);
         
-        // 射击按钮文字
+        // 射击按钮文字 - 更大
         this.shootBtnText = this.add.text(btnX, btnY, '🔫', {
-            fontSize: '36px'
+            fontSize: '48px'
         }).setOrigin(0.5);
         this.shootBtnText.setDepth(101);
         this.shootBtnText.setScrollFactor(0);
         
         // 射击提示
-        this.shootHint = this.add.text(btnX, btnY + 75, '射击', {
-            fontSize: '14px',
+        this.shootHint = this.add.text(btnX, btnY + 95, '射击', {
+            fontSize: '18px',
             fill: '#aaaaaa'
         }).setOrigin(0.5);
         this.shootHint.setDepth(100);
         this.shootHint.setScrollFactor(0);
         
-        // 射击按钮交互
-        this.shootBtnZone = this.add.circle(btnX, btnY, 70, 0x000000, 0.01);
+        // 射击按钮交互 - 更大
+        this.shootBtnZone = this.add.circle(btnX, btnY, 90, 0x000000, 0.01);
         this.shootBtnZone.setDepth(99);
         this.shootBtnZone.setScrollFactor(0);
         this.shootBtnZone.setInteractive();
@@ -322,17 +323,17 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
         
-        // 技能按钮位置 - 射击按钮上方
-        const btnX = width * 0.82;
-        const btnY = height * 0.88;
+        // 技能按钮位置 - 射击按钮上方 (竖屏布局)
+        const btnX = width * 0.78;
+        const btnY = height * 0.72;
         
-        // 技能按钮背景
-        this.skillBtnBg = this.add.circle(btnX, btnY, 45, 0xFFD93D, 0.8);
+        // 技能按钮背景 - 更大
+        this.skillBtnBg = this.add.circle(btnX, btnY, 55, 0xFFD93D, 0.8);
         this.skillBtnBg.setStrokeStyle(3, 0xFFFFFF);
         this.skillBtnBg.setDepth(100);
         this.skillBtnBg.setScrollFactor(0);
         
-        // 技能按钮图标
+        // 技能按钮图标 - 更大
         const skillIcon = this.selectedCharacter.skill.effect === 'slow' ? '🥧' :
                          this.selectedCharacter.skill.effect === 'teleport' ? '💻' :
                          this.selectedCharacter.skill.effect === 'stun' ? '🧋' :
@@ -341,27 +342,27 @@ class GameScene extends Phaser.Scene {
                          this.selectedCharacter.skill.effect === 'blackout' ? '🐛' : '🪨';
         
         this.skillBtnText = this.add.text(btnX, btnY, skillIcon, {
-            fontSize: '32px'
+            fontSize: '40px'
         }).setOrigin(0.5);
         this.skillBtnText.setDepth(101);
         this.skillBtnText.setScrollFactor(0);
         
         // 技能提示
-        this.skillBtnHint = this.add.text(btnX, btnY + 60, '技能', {
-            fontSize: '14px',
+        this.skillBtnHint = this.add.text(btnX, btnY + 75, '技能', {
+            fontSize: '18px',
             fill: '#aaaaaa'
         }).setOrigin(0.5);
         this.skillBtnHint.setDepth(100);
         this.skillBtnHint.setScrollFactor(0);
         
-        // 冷却遮罩
-        this.skillCooldownMask = this.add.arc(btnX, btnY, 45, -90, 270, false, 0x000000, 0.6);
+        // 冷却遮罩 - 更大
+        this.skillCooldownMask = this.add.arc(btnX, btnY, 55, -90, 270, false, 0x000000, 0.6);
         this.skillCooldownMask.setDepth(102);
         this.skillCooldownMask.setScrollFactor(0);
         this.skillCooldownMask.visible = false;
         
-        // 技能按钮交互
-        this.skillBtnZone = this.add.circle(btnX, btnY, 60, 0x000000, 0.01);
+        // 技能按钮交互 - 更大
+        this.skillBtnZone = this.add.circle(btnX, btnY, 75, 0x000000, 0.01);
         this.skillBtnZone.setDepth(99);
         this.skillBtnZone.setScrollFactor(0);
         this.skillBtnZone.setInteractive();

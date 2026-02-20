@@ -1,10 +1,10 @@
 class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, characterData) {
-        // 创建一个临时图形作为精灵
+        // 创建一个临时图形作为精灵 - 更大尺寸
         const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
         graphics.fillStyle(characterData.color, 1);
-        graphics.fillRect(0, 0, 40, 40);
-        graphics.generateTexture('player_' + characterData.id, 40, 40);
+        graphics.fillRect(0, 0, 60, 60);
+        graphics.generateTexture('player_' + characterData.id, 60, 60);
         
         super(scene, x, y, 'player_' + characterData.id);
         
@@ -20,26 +20,26 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.isInvincible = false;
         this.isStunned = false;
         
-        // 添加emoji标识
-        this.emojiText = scene.add.text(0, -35, characterData.emoji, {
-            fontSize: '24px'
+        // 添加emoji标识 - 更大
+        this.emojiText = scene.add.text(0, -50, characterData.emoji, {
+            fontSize: '36px'
         }).setOrigin(0.5);
         
-        // 添加名字
-        this.nameText = scene.add.text(0, -55, characterData.name, {
-            fontSize: '14px',
+        // 添加名字 - 更大
+        this.nameText = scene.add.text(0, -80, characterData.name, {
+            fontSize: '20px',
             fill: '#ffffff',
             fontStyle: 'bold'
         }).setOrigin(0.5);
         
-        // 血条背景
-        this.hpBg = scene.add.rectangle(0, -70, 50, 8, 0x333333);
+        // 血条背景 - 更大
+        this.hpBg = scene.add.rectangle(0, -100, 70, 12, 0x333333);
         // 血条
-        this.hpBar = scene.add.rectangle(-25, -70, 50, 8, 0x00ff00);
+        this.hpBar = scene.add.rectangle(-35, -100, 70, 12, 0x00ff00);
         this.hpBar.setOrigin(0, 0.5);
         
-        // 技能冷却指示器
-        this.skillIndicator = scene.add.circle(25, -70, 6, 0x00ff00);
+        // 技能冷却指示器 - 更大
+        this.skillIndicator = scene.add.circle(40, -100, 8, 0x00ff00);
         
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -55,16 +55,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     updateUIPosition() {
-        this.emojiText.setPosition(this.x, this.y - 35);
-        this.nameText.setPosition(this.x, this.y - 55);
-        this.hpBg.setPosition(this.x, this.y - 70);
-        this.hpBar.setPosition(this.x - 25, this.y - 70);
-        this.skillIndicator.setPosition(this.x + 30, this.y - 70);
+        this.emojiText.setPosition(this.x, this.y - 50);
+        this.nameText.setPosition(this.x, this.y - 80);
+        this.hpBg.setPosition(this.x, this.y - 100);
+        this.hpBar.setPosition(this.x - 35, this.y - 100);
+        this.skillIndicator.setPosition(this.x + 40, this.y - 100);
     }
     
     updateHpBar() {
         const ratio = this.hp / this.maxHp;
-        this.hpBar.width = 50 * ratio;
+        this.hpBar.width = 70 * ratio;
         
         // 根据血量改变颜色
         if (ratio > 0.6) {
@@ -522,10 +522,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.updateUIPosition();
         this.updateSkillIndicator(time);
         
-        // 玩家限制在底部区域 - 动态计算
+        // 玩家限制在底部区域 - 竖屏适配，给控制按钮留出空间
         const screenH = this.scene.scale.height;
-        const topLimit = screenH * 0.5;
-        const bottomLimit = screenH - 30;
+        const topLimit = screenH * 0.45;  // 上方限制
+        const bottomLimit = screenH * 0.78;  // 下方限制（给按钮留空间）
         
         if (this.y < topLimit) {
             this.y = topLimit;

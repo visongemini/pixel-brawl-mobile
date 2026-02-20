@@ -1,7 +1,7 @@
 // 检测是否为移动设备
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// 游戏配置
+// 游戏配置 - 竖屏模式
 const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -24,7 +24,8 @@ const config = {
     ],
     scale: {
         mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        orientation: Phaser.Scale.Orientation.PORTRAIT
     },
     input: {
         activePointers: 3  // 支持多点触控
