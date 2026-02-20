@@ -1,10 +1,11 @@
 class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, characterData) {
-        // 创建一个临时图形作为精灵 - 更大尺寸
+        // 创建一个临时图形作为精灵 - 适中尺寸
+        const size = 45; // 从 60 改小到 45
         const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
         graphics.fillStyle(characterData.color, 1);
-        graphics.fillRect(0, 0, 60, 60);
-        graphics.generateTexture('player_' + characterData.id, 60, 60);
+        graphics.fillRect(0, 0, size, size);
+        graphics.generateTexture('player_' + characterData.id, size, size);
         
         super(scene, x, y, 'player_' + characterData.id);
         
@@ -20,26 +21,26 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.isInvincible = false;
         this.isStunned = false;
         
-        // 添加emoji标识 - 更大
-        this.emojiText = scene.add.text(0, -50, characterData.emoji, {
-            fontSize: '36px'
+        // 添加emoji标识 - 适中尺寸
+        this.emojiText = scene.add.text(0, -38, characterData.emoji, {
+            fontSize: '28px'
         }).setOrigin(0.5);
         
-        // 添加名字 - 更大
-        this.nameText = scene.add.text(0, -80, characterData.name, {
-            fontSize: '20px',
+        // 添加名字 - 适中尺寸
+        this.nameText = scene.add.text(0, -60, characterData.name, {
+            fontSize: '16px',
             fill: '#ffffff',
             fontStyle: 'bold'
         }).setOrigin(0.5);
         
-        // 血条背景 - 更大
-        this.hpBg = scene.add.rectangle(0, -100, 70, 12, 0x333333);
+        // 血条背景 - 适中尺寸
+        this.hpBg = scene.add.rectangle(0, -75, 55, 10, 0x333333);
         // 血条
-        this.hpBar = scene.add.rectangle(-35, -100, 70, 12, 0x00ff00);
+        this.hpBar = scene.add.rectangle(-27.5, -75, 55, 10, 0x00ff00);
         this.hpBar.setOrigin(0, 0.5);
         
-        // 技能冷却指示器 - 更大
-        this.skillIndicator = scene.add.circle(40, -100, 8, 0x00ff00);
+        // 技能冷却指示器 - 适中尺寸
+        this.skillIndicator = scene.add.circle(32, -75, 6, 0x00ff00);
         
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -55,16 +56,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     updateUIPosition() {
-        this.emojiText.setPosition(this.x, this.y - 50);
-        this.nameText.setPosition(this.x, this.y - 80);
-        this.hpBg.setPosition(this.x, this.y - 100);
-        this.hpBar.setPosition(this.x - 35, this.y - 100);
-        this.skillIndicator.setPosition(this.x + 40, this.y - 100);
+        this.emojiText.setPosition(this.x, this.y - 38);
+        this.nameText.setPosition(this.x, this.y - 60);
+        this.hpBg.setPosition(this.x, this.y - 75);
+        this.hpBar.setPosition(this.x - 27.5, this.y - 75);
+        this.skillIndicator.setPosition(this.x + 32, this.y - 75);
     }
     
     updateHpBar() {
         const ratio = this.hp / this.maxHp;
-        this.hpBar.width = 70 * ratio;
+        this.hpBar.width = 55 * ratio;
         
         // 根据血量改变颜色
         if (ratio > 0.6) {

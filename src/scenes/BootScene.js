@@ -18,28 +18,35 @@ class BootScene extends Phaser.Scene {
     }
     
     createPixelTextures() {
-        // 创建角色占位符纹理 - 更大尺寸
+        // 创建角色占位符纹理 - 适中尺寸
         const characters = ['vison', 'matt', 'vina', 'coco', 'cola', 'andy', 'rocky'];
         const colors = [0xFF6B6B, 0x4ECDC4, 0xFF8B94, 0xFFA07A, 0x98FB98, 0x87CEEB, 0xDDA0DD];
+        const size = 45; // 从 60 改小到 45
         
         characters.forEach((char, index) => {
             const graphics = this.make.graphics({ x: 0, y: 0, add: false });
             
-            // 绘制像素风格的角色 - 更大 60x60
+            // 绘制像素风格的角色 - 适中尺寸
             graphics.fillStyle(colors[index], 1);
-            graphics.fillRect(0, 0, 60, 60);
+            graphics.fillRect(0, 0, size, size);
             
             // 添加像素细节
             graphics.fillStyle(0xFFFFFF, 0.5);
-            graphics.fillRect(8, 8, 12, 12);
-            graphics.fillRect(40, 8, 12, 12);
-            graphics.fillRect(15, 38, 30, 12);
+            const eyeSize = Math.floor(size * 0.2);
+            const eyeOffset = Math.floor(size * 0.13);
+            const mouthY = Math.floor(size * 0.63);
+            const mouthW = Math.floor(size * 0.5);
+            const mouthH = Math.floor(size * 0.2);
+            
+            graphics.fillRect(eyeOffset, eyeOffset, eyeSize, eyeSize);
+            graphics.fillRect(size - eyeOffset - eyeSize, eyeOffset, eyeSize, eyeSize);
+            graphics.fillRect(Math.floor(size * 0.25), mouthY, mouthW, mouthH);
             
             // 边框
             graphics.lineStyle(2, 0x000000, 0.3);
-            graphics.strokeRect(0, 0, 60, 60);
+            graphics.strokeRect(0, 0, size, size);
             
-            graphics.generateTexture('char_' + char, 60, 60);
+            graphics.generateTexture('char_' + char, size, size);
         });
     }
     

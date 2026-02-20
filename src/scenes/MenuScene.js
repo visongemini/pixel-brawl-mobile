@@ -87,7 +87,7 @@ class MenuScene extends Phaser.Scene {
             
             // 角色图像
             const charSprite = this.add.image(0, -slotSize * 0.1, 'char_' + char.id);
-            charSprite.setScale(slotSize / 80);
+            charSprite.setScale(slotSize / 60);  // 从 80 改为 60，适应 45px 纹理
             slot.add(charSprite);
             
             // Emoji
