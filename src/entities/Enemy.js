@@ -1,11 +1,12 @@
 class Enemy extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, characterData, player) {
-        // 创建临时纹理 - 更大尺寸
+        // 创建临时纹理 - 适中尺寸 (与Player一致)
         const textureKey = 'enemy_' + characterData.id + '_' + Math.random().toString(36).substr(2, 9);
+        const size = 45; // 从60改小到45，与Player一致
         const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
         graphics.fillStyle(characterData.color, 1);
-        graphics.fillRect(0, 0, 60, 60);
-        graphics.generateTexture(textureKey, 60, 60);
+        graphics.fillRect(0, 0, size, size);
+        graphics.generateTexture(textureKey, size, size);
         
         super(scene, x, y, textureKey);
         
@@ -31,19 +32,19 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.hp = this.maxHp;
         this.aiAggression = 1.3;
         
-        // UI元素 - 更大
-        this.emojiText = scene.add.text(0, -50, characterData.emoji, {
-            fontSize: '36px'
+        // UI元素 - 适中尺寸 (与Player一致)
+        this.emojiText = scene.add.text(0, -38, characterData.emoji, {
+            fontSize: '28px'
         }).setOrigin(0.5);
         
-        this.nameText = scene.add.text(0, -80, characterData.name, {
-            fontSize: '18px',
+        this.nameText = scene.add.text(0, -60, characterData.name, {
+            fontSize: '16px',
             fill: '#ffffff',
             fontStyle: 'bold'
         }).setOrigin(0.5);
         
-        this.hpBg = scene.add.rectangle(0, -100, 70, 12, 0x333333);
-        this.hpBar = scene.add.rectangle(-35, -100, 70, 12, 0xff0000);
+        this.hpBg = scene.add.rectangle(0, -75, 55, 10, 0x333333);
+        this.hpBar = scene.add.rectangle(-27.5, -75, 55, 10, 0xff0000);
         this.hpBar.setOrigin(0, 0.5);
         
         // 状态图标
@@ -76,15 +77,15 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     
     updateUIPosition() {
-        this.emojiText.setPosition(this.x, this.y - 50);
-        this.nameText.setPosition(this.x, this.y - 80);
-        this.hpBg.setPosition(this.x, this.y - 100);
-        this.hpBar.setPosition(this.x - 35, this.y - 100);
+        this.emojiText.setPosition(this.x, this.y - 38);
+        this.nameText.setPosition(this.x, this.y - 60);
+        this.hpBg.setPosition(this.x, this.y - 75);
+        this.hpBar.setPosition(this.x - 27.5, this.y - 75);
     }
     
     updateHpBar() {
         const ratio = Math.max(0, this.hp / this.maxHp);
-        this.hpBar.width = 70 * ratio;
+        this.hpBar.width = 55 * ratio;
     }
     
     takeDamage(damage) {

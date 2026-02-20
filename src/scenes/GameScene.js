@@ -478,6 +478,17 @@ class GameScene extends Phaser.Scene {
     }
     
     createCollisions() {
+        // 先创建子弹组（必须先创建再设置碰撞）
+        this.bullets = this.physics.add.group({
+            classType: Bullet,
+            runChildUpdate: true
+        });
+        
+        this.enemyBullets = this.physics.add.group({
+            classType: Bullet,
+            runChildUpdate: true
+        });
+        
         // 玩家子弹击中敌人
         this.physics.add.overlap(
             this.bullets,
@@ -501,17 +512,6 @@ class GameScene extends Phaser.Scene {
         
         // 敌人和玩家碰撞
         this.physics.add.collider(this.enemies, this.player);
-        
-        // 创建子弹组
-        this.bullets = this.physics.add.group({
-            classType: Bullet,
-            runChildUpdate: true
-        });
-        
-        this.enemyBullets = this.physics.add.group({
-            classType: Bullet,
-            runChildUpdate: true
-        });
     }
     
     startTimer() {
