@@ -1,13 +1,16 @@
 class Enemy extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, characterData, player) {
         // 创建临时纹理 - 适中尺寸 (与Player一致)
-        const textureKey = 'enemy_' + characterData.id + '_' + Math.random().toString(36).substr(2, 9);
-        const size = 45; // 从60改小到45，与Player一致
-        const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
-        graphics.fillStyle(characterData.color, 1);
-        graphics.fillRect(0, 0, size, size);
-        graphics.generateTexture(textureKey, size, size);
-        
+        const textureKey = 'enemy_' + characterData.id;
+        const size = 45;
+        if (!scene.textures.exists(textureKey)) {
+            const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
+            graphics.fillStyle(characterData.color, 1);
+            graphics.fillRect(0, 0, size, size);
+            graphics.generateTexture(textureKey, size, size);
+            graphics.destroy();
+        }
+
         super(scene, x, y, textureKey);
         
         this.characterData = characterData;
@@ -246,7 +249,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     
     createBullet(angle) {
         const weapon = this.characterData.weapon;
-        const bullet = new Bullet(this.scene, this.x, this.y, null, {
+        const bullet = new Bullet(this.scene, this.x, this.y, 'bullet', {
             damage: weapon.damage,
             speed: weapon.bulletSpeed,
             color: weapon.bulletColor,
@@ -257,9 +260,12 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             owner: this,
             bulletType: weapon.wave ? 'wave' : 'normal'
         });
-        
+
         bullet.body.setCircle(weapon.bulletSize / 2);
-        
+
+        // 加入碰撞组
+        this.scene.enemyBullets.add(bullet);
+
         return bullet;
     }
     
@@ -323,6 +329,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         });
         
         // 根据技能类型执行效果
+        const distToPlayer = Phaser.Math.Distance.Between(this.x, this.y, this.player.x, this.player.y);
+
         switch(skill.effect) {
             case 'invincible':
                 this.setTint(0x808080);
@@ -331,16 +339,14 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
                 });
                 break;
             case 'aoe':
-                // AOE伤害玩家
-                const dist = Phaser.Math.Distance.Between(this.x, this.y, this.player.x, this.player.y);
-                if (dist < 200) {
+                if (distToPlayer < 200) {
                     this.player.takeDamage(skill.damage * 0.5);
                 }
                 this.takeDamage(skill.selfDamage || 0);
                 break;
             case 'slow':
-                if (dist < 150) {
-                    // 减速效果（通过影响玩家移动实现，这里简化）
+                if (distToPlayer < 150) {
+                    // 减速效果（简化）
                 }
                 break;
         }

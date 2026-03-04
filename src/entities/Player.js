@@ -2,12 +2,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, characterData) {
         // 创建一个临时图形作为精灵 - 适中尺寸
         const size = 45; // 从 60 改小到 45
-        const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
-        graphics.fillStyle(characterData.color, 1);
-        graphics.fillRect(0, 0, size, size);
-        graphics.generateTexture('player_' + characterData.id, size, size);
-        
-        super(scene, x, y, 'player_' + characterData.id);
+        const textureKey = 'player_' + characterData.id;
+        if (!scene.textures.exists(textureKey)) {
+            const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
+            graphics.fillStyle(characterData.color, 1);
+            graphics.fillRect(0, 0, size, size);
+            graphics.generateTexture(textureKey, size, size);
+            graphics.destroy();
+        }
+
+        super(scene, x, y, textureKey);
         
         this.characterData = characterData;
         this.maxHp = characterData.hp;
@@ -113,17 +117,23 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     die() {
-        // 死亡特效
-        const particles = this.scene.add.particles(this.x, this.y, 'player_' + this.characterData.id, {
-            speed: { min: 50, max: 200 },
-            scale: { start: 0.5, end: 0 },
-            alpha: { start: 1, end: 0 },
-            lifespan: 500,
-            quantity: 20,
-            tint: this.characterData.color
-        });
-        
-        this.scene.time.delayedCall(500, () => particles.destroy());
+        // 死亡特效（矩形粒子，与 Enemy.die 一致）
+        for (let i = 0; i < 15; i++) {
+            const particle = this.scene.add.rectangle(
+                this.x, this.y, 8, 8, this.characterData.color
+            );
+            const angle = (i / 15) * Math.PI * 2;
+            const speed = 100 + Math.random() * 150;
+            this.scene.tweens.add({
+                targets: particle,
+                x: this.x + Math.cos(angle) * speed,
+                y: this.y + Math.sin(angle) * speed,
+                rotation: Math.random() * Math.PI * 2,
+                alpha: 0, scale: 0,
+                duration: 600,
+                onComplete: () => particle.destroy()
+            });
+        }
         
         this.emojiText.destroy();
         this.nameText.destroy();
@@ -167,7 +177,20 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     
     createBullet(angle) {
         const weapon = this.characterData.weapon;
-        const bullet = new Bullet(this.scene, this.x, this.y, null, {
+
+        // 追踪弹：找最近敌人作为目标
+        let homingTarget = null;
+        if (weapon.homing) {
+            let nearestDist = Infinity;
+            this.scene.enemies.getChildren().forEach(enemy => {
+                if (enemy.active) {
+                    const d = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y);
+                    if (d < nearestDist) { nearestDist = d; homingTarget = enemy; }
+                }
+            });
+        }
+
+        const bullet = new Bullet(this.scene, this.x, this.y, 'bullet', {
             damage: weapon.damage,
             speed: weapon.bulletSpeed,
             color: weapon.bulletColor,
@@ -176,12 +199,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             glow: true,
             trail: true,
             owner: this,
-            bulletType: weapon.wave ? 'wave' : weapon.homing ? 'homing' : 'normal'
+            bulletType: weapon.wave ? 'wave' : weapon.homing ? 'homing' : 'normal',
+            homingTarget: homingTarget
         });
-        
+
         // 圆形碰撞体
         bullet.body.setCircle(weapon.bulletSize / 2);
-        
+
+        // 加入碰撞组
+        this.scene.bullets.add(bullet);
+
         return bullet;
     }
     
@@ -306,8 +333,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 三杯奶茶从天而降
         for (let i = 0; i < 3; i++) {
             this.scene.time.delayedCall(i * 200, () => {
-                const targetX = Phaser.Math.Between(200, 760);
-                const targetY = Phaser.Math.Between(100, 300);
+                const sw = this.scene.scale.width;
+                const sh = this.scene.scale.height;
+                const targetX = Phaser.Math.Between(sw * 0.1, sw * 0.9);
+                const targetY = Phaser.Math.Between(sh * 0.08, sh * 0.4);
                 
                 // 奶茶下落
                 const bubbleTea = this.scene.add.text(targetX, -50, '🧋', {
@@ -416,19 +445,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             enemy.takeDamage(skill.damage);
         });
         
-        // 爆炸粒子
-        const particles = this.scene.add.particles(this.x, this.y, null, {
-            x: this.x,
-            y: this.y,
-            speed: { min: 100, max: 400 },
-            scale: { start: 0.5, end: 0 },
-            alpha: { start: 1, end: 0 },
-            lifespan: 600,
-            quantity: 30,
-            emitting: false
-        });
-        
-        // 手动创建粒子
+        // 手动创建爆炸粒子
         for (let i = 0; i < 30; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = 100 + Math.random() * 300;

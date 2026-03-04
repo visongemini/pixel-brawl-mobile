@@ -115,27 +115,29 @@ class MenuScene extends Phaser.Scene {
             bg.setInteractive({ useHandCursor: true });
             
             bg.on('pointerover', () => {
-                this.tweens.add({
-                    targets: slot,
-                    scale: 1.1,
-                    duration: 100
-                });
+                this.tweens.add({ targets: slot, scale: 1.1, duration: 100 });
                 bg.setStrokeStyle(3, 0xFFD93D);
             });
-            
+
             bg.on('pointerout', () => {
-                this.tweens.add({
-                    targets: slot,
-                    scale: 1,
-                    duration: 100
-                });
+                this.tweens.add({ targets: slot, scale: 1, duration: 100 });
                 if (this.selectedCharacter !== char) {
                     bg.setStrokeStyle(2, 0x444444);
                 }
             });
-            
+
             bg.on('pointerdown', () => {
+                // 移动端触觉反馈（hover 在触屏上无效）
+                this.tweens.add({ targets: slot, scale: 1.1, duration: 50 });
+                bg.setStrokeStyle(3, 0xFFD93D);
                 this.selectCharacter(char, bg, slot);
+            });
+
+            bg.on('pointerup', () => {
+                if (this.selectedCharacter !== char) {
+                    this.tweens.add({ targets: slot, scale: 1, duration: 50 });
+                    bg.setStrokeStyle(2, 0x444444);
+                }
             });
             
             slot.charData = char;
@@ -222,24 +224,19 @@ class MenuScene extends Phaser.Scene {
         bg.setInteractive({ useHandCursor: true });
         
         bg.on('pointerover', () => {
-            this.tweens.add({
-                targets: this.startButton,
-                scale: 1.1,
-                duration: 100
-            });
+            this.tweens.add({ targets: this.startButton, scale: 1.1, duration: 100 });
             bg.setFillStyle(0xFF8B94);
         });
-        
+
         bg.on('pointerout', () => {
-            this.tweens.add({
-                targets: this.startButton,
-                scale: 1,
-                duration: 100
-            });
+            this.tweens.add({ targets: this.startButton, scale: 1, duration: 100 });
             bg.setFillStyle(0xFF6B6B);
         });
-        
+
         bg.on('pointerdown', () => {
+            // 移动端触觉反馈
+            this.tweens.add({ targets: this.startButton, scale: 1.1, duration: 50 });
+            bg.setFillStyle(0xFF8B94);
             if (this.selectedCharacter) {
                 this.startGame();
             } else {
@@ -258,8 +255,13 @@ class MenuScene extends Phaser.Scene {
                 });
             }
         });
+
+        bg.on('pointerup', () => {
+            this.tweens.add({ targets: this.startButton, scale: 1, duration: 50 });
+            bg.setFillStyle(0xFF6B6B);
+        });
     }
-    
+
     startGame() {
         // 过渡动画
         this.cameras.main.fadeOut(500, 0, 0, 0);

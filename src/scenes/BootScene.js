@@ -47,23 +47,26 @@ class BootScene extends Phaser.Scene {
             graphics.strokeRect(0, 0, size, size);
             
             graphics.generateTexture('char_' + char, size, size);
+            graphics.destroy();
         });
     }
-    
+
     createBulletTexture() {
         const graphics = this.make.graphics({ x: 0, y: 0, add: false });
         graphics.fillStyle(0xFFFFFF, 1);
         graphics.fillCircle(8, 8, 8);
         graphics.generateTexture('bullet', 16, 16);
+        graphics.destroy();
     }
-    
+
     createParticleTexture() {
         const graphics = this.make.graphics({ x: 0, y: 0, add: false });
         graphics.fillStyle(0xFFFFFF, 1);
         graphics.fillRect(0, 0, 8, 8);
         graphics.generateTexture('particle', 8, 8);
+        graphics.destroy();
     }
-    
+
     createBackgroundTexture() {
         // 创建像素风格背景 - 动态尺寸
         const graphics = this.make.graphics({ x: 0, y: 0, add: false });
@@ -93,6 +96,7 @@ class BootScene extends Phaser.Scene {
         }
         
         graphics.generateTexture('background', 960, 640);
+        graphics.destroy();
     }
     
     create() {

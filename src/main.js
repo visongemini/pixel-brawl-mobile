@@ -51,7 +51,4 @@ document.addEventListener('touchmove', event => {
     event.preventDefault();
 }, { passive: false });
 
-// 窗口大小改变时重新调整
-window.addEventListener('resize', () => {
-    game.scale.resize(window.innerWidth, window.innerHeight);
-});
+// Phaser Scale.RESIZE 模式已自动处理窗口尺寸变化

@@ -122,7 +122,7 @@ class GameScene extends Phaser.Scene {
         const height = this.scale.height;
         
         // 倒计时
-        this.timerText = this.add.text(width/2, height * 0.06, '180', {
+        this.timerText = this.add.text(width/2, height * 0.06, '3:00', {
             fontSize: height * 0.06 + 'px',
             fill: '#FFD93D',
             fontStyle: 'bold',
@@ -213,8 +213,8 @@ class GameScene extends Phaser.Scene {
             this.joystick.centerY = joystickY;
         });
 
-        // 使用 zone 自身的 drag 事件，而不是全局 pointermove
-        this.joystickZone.on('pointermove', (pointer, localX, localY, event) => {
+        // 用全局 input 事件追踪手指，即使滑出 zone 也能继续
+        this.input.on('pointermove', (pointer) => {
             if (this.joystick.active && this.joystick.pointerId === pointer.id) {
                 const dx = pointer.x - this.joystick.centerX;
                 const dy = pointer.y - this.joystick.centerY;
@@ -232,28 +232,8 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 使用 zone 自身的 pointerup，而不是全局事件
-        this.joystickZone.on('pointerup', (pointer, localX, localY, event) => {
-            if (this.joystick.pointerId === pointer.id) {
-                this.joystick.active = false;
-                this.joystick.pointer = null;
-                this.joystick.pointerId = null;
-                this.joystick.deltaX = 0;
-                this.joystick.deltaY = 0;
-
-                // 重置摇杆位置
-                this.tweens.add({
-                    targets: this.joystickThumb,
-                    x: this.joystick.centerX || joystickX,
-                    y: this.joystick.centerY || joystickY,
-                    duration: 150,
-                    ease: 'Power2'
-                });
-            }
-        });
-
-        // 手指滑出区域时也要释放
-        this.joystickZone.on('pointerupoutside', (pointer, localX, localY, event) => {
+        // 全局 pointerup 处理摇杆释放（无论手指在哪松开）
+        this.input.on('pointerup', (pointer) => {
             if (this.joystick.pointerId === pointer.id) {
                 this.joystick.active = false;
                 this.joystick.pointer = null;
@@ -307,46 +287,59 @@ class GameScene extends Phaser.Scene {
         this.shootBtnZone.setScrollFactor(0);
         this.shootBtnZone.setInteractive();
 
-        // 点击开始射击
+        // 自动射击辅助函数
+        const fireAtNearest = () => {
+            if (this.isGameOver || !this.player.active) return;
+
+            let targetX = this.player.x;
+            let targetY = this.player.y - 200;
+            let nearestDist = Infinity;
+
+            this.enemies.getChildren().forEach(enemy => {
+                if (enemy.active) {
+                    const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y);
+                    if (dist < nearestDist) {
+                        nearestDist = dist;
+                        targetX = enemy.x;
+                        targetY = enemy.y;
+                    }
+                }
+            });
+
+            this.player.fire(targetX, targetY);
+        };
+
+        // 按住持续射击
         this.shootBtnZone.on('pointerdown', (pointer, localX, localY, event) => {
-            // 阻止事件冒泡，防止与其他按钮冲突
             if (event) event.stopPropagation();
 
-            if (!this.isGameOver && this.player.active) {
-                // 向最近敌人射击，或向上射击
-                let targetX = this.player.x;
-                let targetY = this.player.y - 200;
+            fireAtNearest();
 
-                // 找到最近的敌人
-                let nearestEnemy = null;
-                let nearestDist = Infinity;
+            // 按钮按下效果
+            this.tweens.add({
+                targets: this.shootBtnBg,
+                scale: 0.9,
+                duration: 50,
+                yoyo: true
+            });
 
-                this.enemies.getChildren().forEach(enemy => {
-                    if (enemy.active) {
-                        const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y);
-                        if (dist < nearestDist) {
-                            nearestDist = dist;
-                            nearestEnemy = enemy;
-                        }
-                    }
-                });
-
-                if (nearestEnemy) {
-                    targetX = nearestEnemy.x;
-                    targetY = nearestEnemy.y;
-                }
-
-                this.player.fire(targetX, targetY);
-
-                // 按钮按下效果
-                this.tweens.add({
-                    targets: this.shootBtnBg,
-                    scale: 0.9,
-                    duration: 50,
-                    yoyo: true
-                });
-            }
+            // 持续射击定时器
+            this.autoFireTimer = this.time.addEvent({
+                delay: this.selectedCharacter.weapon.fireRate,
+                callback: fireAtNearest,
+                loop: true
+            });
         });
+
+        // 松手停止射击
+        const stopFire = (pointer) => {
+            if (this.autoFireTimer) {
+                this.autoFireTimer.remove();
+                this.autoFireTimer = null;
+            }
+        };
+        this.shootBtnZone.on('pointerup', stopFire);
+        this.shootBtnZone.on('pointerupoutside', stopFire);
     }
     
     createSkillButton() {
@@ -578,30 +571,33 @@ class GameScene extends Phaser.Scene {
     
     hitEnemy(bullet, enemy) {
         if (!bullet.active || !enemy.active) return;
-        
-        const isDead = enemy.takeDamage(bullet.damage);
+
+        // 保存属性（destroy 后不可靠）
+        const bx = bullet.x;
+        const by = bullet.y;
+        const damage = bullet.damage;
+        const color = bullet.tintTopLeft || 0xFFFFFF;
+
+        enemy.takeDamage(damage);
         bullet.destroy();
-        
-        // 击中特效
-        this.createHitEffect(bullet.x, bullet.y, bullet.fillColor);
-        
-        // 更新UI
-        this.updateUI();
+
+        this.createHitEffect(bx, by, color);
     }
-    
-    hitPlayer(bullet, player) {
-        if (!bullet.active || !player.active) return;
-        
-        const result = player.takeDamage(bullet.damage);
-        bullet.destroy();
-        
-        // 击中特效
-        this.createHitEffect(bullet.x, bullet.y, 0xFF0000);
-        
-        // 更新UI
-        this.updateUI();
-        
-        // 检查死亡
+
+    hitPlayer(enemyBullet, player) {
+        // Phaser overlap(group, sprite) 回调顺序：(groupMember, sprite)
+        // 所以第一个参数是 enemyBullet，第二个是 player
+        if (!enemyBullet.active || !player.active) return;
+
+        const bx = enemyBullet.x;
+        const by = enemyBullet.y;
+        const damage = enemyBullet.damage;
+
+        const result = player.takeDamage(damage);
+        enemyBullet.destroy();
+
+        this.createHitEffect(bx, by, 0xFF0000);
+
         if (player.hp <= 0 && !this.isGameOver) {
             this.gameLose('death');
         }

@@ -195,28 +195,24 @@ class GameOverScene extends Phaser.Scene {
         restartBg.setInteractive({ useHandCursor: true });
         
         restartBg.on('pointerover', () => {
-            this.tweens.add({
-                targets: restartBtn,
-                scale: 1.1,
-                duration: 100
-            });
+            this.tweens.add({ targets: restartBtn, scale: 1.1, duration: 100 });
             restartBg.setFillStyle(0x5EDDD4);
         });
-        
         restartBg.on('pointerout', () => {
-            this.tweens.add({
-                targets: restartBtn,
-                scale: 1,
-                duration: 100
-            });
+            this.tweens.add({ targets: restartBtn, scale: 1, duration: 100 });
             restartBg.setFillStyle(0x4ECDC4);
         });
-        
         restartBg.on('pointerdown', () => {
+            this.tweens.add({ targets: restartBtn, scale: 1.1, duration: 50 });
+            restartBg.setFillStyle(0x5EDDD4);
             this.cameras.main.fadeOut(300, 0, 0, 0);
             this.time.delayedCall(300, () => {
                 this.scene.start('MenuScene');
             });
+        });
+        restartBg.on('pointerup', () => {
+            this.tweens.add({ targets: restartBtn, scale: 1, duration: 50 });
+            restartBg.setFillStyle(0x4ECDC4);
         });
         
         // 选择角色按钮
@@ -236,28 +232,24 @@ class GameOverScene extends Phaser.Scene {
         menuBg.setInteractive({ useHandCursor: true });
         
         menuBg.on('pointerover', () => {
-            this.tweens.add({
-                targets: menuBtn,
-                scale: 1.1,
-                duration: 100
-            });
+            this.tweens.add({ targets: menuBtn, scale: 1.1, duration: 100 });
             menuBg.setFillStyle(0xFF8B8B);
         });
-        
         menuBg.on('pointerout', () => {
-            this.tweens.add({
-                targets: menuBtn,
-                scale: 1,
-                duration: 100
-            });
+            this.tweens.add({ targets: menuBtn, scale: 1, duration: 100 });
             menuBg.setFillStyle(0xFF6B6B);
         });
-        
         menuBg.on('pointerdown', () => {
+            this.tweens.add({ targets: menuBtn, scale: 1.1, duration: 50 });
+            menuBg.setFillStyle(0xFF8B8B);
             this.cameras.main.fadeOut(300, 0, 0, 0);
             this.time.delayedCall(300, () => {
                 this.scene.start('MenuScene');
             });
+        });
+        menuBg.on('pointerup', () => {
+            this.tweens.add({ targets: menuBtn, scale: 1, duration: 50 });
+            menuBg.setFillStyle(0xFF6B6B);
         });
     }
 }
