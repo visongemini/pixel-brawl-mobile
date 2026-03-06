@@ -61,8 +61,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         // AI行为定时器
         this.startAI();
         
-        // 发光效果
-        this.preFX.addGlow(characterData.color, 2, 0, false, 0.1, 5);
+        // 发光效果（禁用以提升性能）
+        // this.preFX.addGlow(characterData.color, 2, 0, false, 0.1, 5);
     }
     
     startAI() {
@@ -255,7 +255,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             color: weapon.bulletColor,
             scale: weapon.bulletSize / 10,
             angle: angle,
-            glow: true,
+            glow: false,
             isEnemy: true,
             owner: this,
             bulletType: weapon.wave ? 'wave' : 'normal'

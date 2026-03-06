@@ -55,8 +55,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 更新UI位置
         this.updateUIPosition();
         
-        // 发光效果
-        this.preFX.addGlow(characterData.color, 2, 0, false, 0.1, 5);
+        // 发光效果（禁用以提升性能）
+        // this.preFX.addGlow(characterData.color, 2, 0, false, 0.1, 5);
     }
     
     updateUIPosition() {
@@ -196,8 +196,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             color: weapon.bulletColor,
             scale: weapon.bulletSize / 10,
             angle: angle,
-            glow: true,
-            trail: true,
+            glow: false,
+            trail: false,
             owner: this,
             bulletType: weapon.wave ? 'wave' : weapon.homing ? 'homing' : 'normal',
             homingTarget: homingTarget

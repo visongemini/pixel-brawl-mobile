@@ -604,22 +604,15 @@ class GameScene extends Phaser.Scene {
     }
     
     createHitEffect(x, y, color) {
-        // 爆炸粒子 - 减少数量防止性能问题
-        for (let i = 0; i < 4; i++) {
-            const angle = (i / 4) * Math.PI * 2;
-            const speed = 40 + Math.random() * 40;
-            const particle = this.add.circle(x, y, 3, color);
-
-            this.tweens.add({
-                targets: particle,
-                x: x + Math.cos(angle) * speed,
-                y: y + Math.sin(angle) * speed,
-                alpha: 0,
-                scale: 0,
-                duration: 250,
-                onComplete: () => particle.destroy()
-            });
-        }
+        // 简单闪光效果，避免大量粒子
+        const flash = this.add.circle(x, y, 8, color, 0.8);
+        this.tweens.add({
+            targets: flash,
+            alpha: 0,
+            scale: 2,
+            duration: 150,
+            onComplete: () => flash.destroy()
+        });
     }
     
     gameWin() {

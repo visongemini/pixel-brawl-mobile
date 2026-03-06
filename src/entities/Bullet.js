@@ -22,10 +22,10 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
         this.setTint(config.color || 0xFFFFFF);
         this.setScale(config.scale || 1);
         
-        // 发光效果
-        if (config.glow) {
-            this.preFX.addGlow(config.color || 0xFFFFFF, 4, 0, false, 0.1, 10);
-        }
+        // 发光效果（禁用以提升性能）
+        // if (config.glow) {
+        //     this.preFX.addGlow(config.color || 0xFFFFFF, 4, 0, false, 0.1, 10);
+        // }
         
         // 设置速度
         scene.physics.velocityFromRotation(config.angle, this.speed, this.body.velocity);
