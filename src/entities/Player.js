@@ -500,37 +500,39 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // Rocky - 坚如磐石
     skillInvincible() {
         const skill = this.characterData.skill;
-        
+
         this.isInvincible = true;
-        
+
         // 变石头特效
         this.setTint(0x808080);
         const glasses = this.scene.add.text(this.x, this.y - 10, '🕶️', {
             fontSize: '20px'
         }).setOrigin(0.5);
-        
+
         // 护盾光环
         const shield = this.scene.add.circle(this.x, this.y, 35, 0xFFFFFF, 0.3);
         shield.setStrokeStyle(3, 0x808080);
-        
-        // 更新护盾位置
-        const updateShield = () => {
-            if (shield.active && this.active) {
-                shield.x = this.x;
-                shield.y = this.y;
-                glasses.x = this.x;
-                glasses.y = this.y - 10;
-            }
-        };
-        
-        this.scene.events.on('update', updateShield);
-        
+
+        // 用定时器更新护盾位置，避免事件监听泄漏
+        const shieldTimer = this.scene.time.addEvent({
+            delay: 16,
+            callback: () => {
+                if (shield.active && this.active) {
+                    shield.x = this.x;
+                    shield.y = this.y;
+                    glasses.x = this.x;
+                    glasses.y = this.y - 10;
+                }
+            },
+            loop: true
+        });
+
         this.scene.time.delayedCall(skill.duration, () => {
             this.isInvincible = false;
             this.clearTint();
             glasses.destroy();
             shield.destroy();
-            this.scene.events.off('update', updateShield);
+            shieldTimer.remove();
         });
     }
     

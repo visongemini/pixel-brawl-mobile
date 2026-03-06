@@ -40,19 +40,23 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     }
     
     createTrail(scene, color) {
-        // 简化的拖尾效果
+        // 轻量拖尾：降低频率，限制数量
+        this.trailCount = 0;
         this.trailTimer = scene.time.addEvent({
-            delay: 50,
+            delay: 150,
             callback: () => {
-                if (this.active) {
-                    const trail = scene.add.circle(this.x, this.y, 3, color, 0.5);
+                if (this.active && this.trailCount < 8) {
+                    this.trailCount++;
+                    const trail = scene.add.circle(this.x, this.y, 2, color, 0.3);
                     trail.setDepth(this.depth - 1);
                     scene.tweens.add({
                         targets: trail,
                         alpha: 0,
-                        scale: 0.5,
-                        duration: 300,
-                        onComplete: () => trail.destroy()
+                        duration: 200,
+                        onComplete: () => {
+                            this.trailCount--;
+                            trail.destroy();
+                        }
                     });
                 }
             },

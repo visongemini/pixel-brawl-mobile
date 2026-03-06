@@ -407,13 +407,13 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
                 this.body.velocity.y = Math.sin(angleToPlayer) * speed * 0.5; // 垂直移动较慢
             }
             
-            // 随机射击（提高频率）
-            if (Math.random() < 0.025 * this.aiAggression) {
+            // 随机射击
+            if (Math.random() < 0.012 * this.aiAggression) {
                 this.fire();
             }
-            
-            // 随机使用技能（提高频率）
-            if (Math.random() < 0.008 * this.aiAggression) {
+
+            // 随机使用技能
+            if (Math.random() < 0.005 * this.aiAggression) {
                 this.useSkill();
             }
         }
