@@ -36,8 +36,41 @@
     </style>
     <!-- Phaser 3 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        #error-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(255,0,0,0.9);
+            color: #fff;
+            font-size: 14px;
+            padding: 10px;
+            z-index: 99999;
+            word-break: break-all;
+            max-height: 40vh;
+            overflow: auto;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+    </style>
+    <script>
+        var errorLog = [];
+        window.onerror = function(msg, url, line, col, err) {
+            var el = document.getElementById('error-overlay');
+            errorLog.push(line + ':' + col + ' ' + msg + ' (' + (url||'').split('/').pop() + ')');
+            el.textContent = errorLog.join('\n');
+            el.style.display = 'block';
+        };
+        window.addEventListener('unhandledrejection', function(e) {
+            var el = document.getElementById('error-overlay');
+            errorLog.push('Promise: ' + e.reason);
+            el.textContent = errorLog.join('\n');
+            el.style.display = 'block';
+        });
+    </script>
 </head>
 <body>
+    <div id="error-overlay"></div>
     <div id="game-container"></div>
     
     <script src="src/data/characters.js"></script>
