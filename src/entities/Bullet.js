@@ -66,18 +66,34 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
-        
+        if (!this.active || !this.scene) return;
+
+        // 边界检查 - 放在最前面，先检查再做复杂计算
+        const boundsX = this.scene.scale.width;
+        const boundsY = this.scene.scale.height;
+        if (this.x < 0 || this.x > boundsX || this.y < 0 || this.y > boundsY) {
+            this.destroy();
+            return;
+        }
+
+        // 生命周期
+        this.lifespan -= delta;
+        if (this.lifespan <= 0) {
+            this.destroy();
+            return;
+        }
+
         // 波浪弹道
         if (this.bulletType === 'wave') {
             this.waveOffset += this.waveFrequency * delta;
             const perpendicularX = -Math.sin(this.body.velocity.angle());
             const perpendicularY = Math.cos(this.body.velocity.angle());
             const offset = Math.sin(this.waveOffset) * this.waveAmplitude;
-            
+
             this.body.velocity.x = Math.cos(this.body.velocity.angle()) * this.speed + perpendicularX * offset * 0.1;
             this.body.velocity.y = Math.sin(this.body.velocity.angle()) * this.speed + perpendicularY * offset * 0.1;
         }
-        
+
         // 追踪弹
         if (this.bulletType === 'homing' && this.homingTarget && this.homingTarget.active) {
             const angleToTarget = Phaser.Math.Angle.Between(
@@ -87,19 +103,6 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
             const currentAngle = this.body.velocity.angle();
             const newAngle = Phaser.Math.Angle.RotateTo(currentAngle, angleToTarget, this.homingStrength);
             this.scene.physics.velocityFromRotation(newAngle, this.speed, this.body.velocity);
-        }
-        
-        // 生命周期
-        this.lifespan -= delta;
-        if (this.lifespan <= 0) {
-            this.destroy();
-        }
-        
-        // 边界检查 - 使用动态边界
-        const boundsX = this.scene.scale.width;
-        const boundsY = this.scene.scale.height;
-        if (this.x < 0 || this.x > boundsX || this.y < 0 || this.y > boundsY) {
-            this.destroy();
         }
     }
     

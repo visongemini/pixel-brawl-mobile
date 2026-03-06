@@ -221,9 +221,10 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     
     fire() {
+        if (!this.player || !this.player.active) return;
         const time = this.scene.time.now;
         const weapon = this.characterData.weapon;
-        
+
         if (time - this.lastFireTime < weapon.fireRate) {
             return;
         }
@@ -354,7 +355,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
-        
+        if (!this.active || !this.scene) return;
+
         // 检查状态
         if (this.isStunned && time > this.stunEndTime) {
             this.isStunned = false;
