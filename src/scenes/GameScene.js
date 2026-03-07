@@ -69,8 +69,8 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
         
-        // 玩家在底部中央（竖屏）
-        this.player = new Player(this, width/2, height * 0.65, this.selectedCharacter);
+        // 玩家在中部偏下（竖屏）
+        this.player = new Player(this, width/2, height * 0.55, this.selectedCharacter);
         this.player.setDepth(10);
         
         // 出生特效 - 更大
@@ -146,7 +146,7 @@ class GameScene extends Phaser.Scene {
         });
         
         // 技能提示
-        this.skillHint = this.add.text(width/2, height * 0.95, `【技能】${this.selectedCharacter.skill.name}`, {
+        this.skillHint = this.add.text(width/2, height * 0.92, `【技能】${this.selectedCharacter.skill.name}`, {
             fontSize: height * 0.02 + 'px',
             fill: '#4ECDC4',
             fontStyle: 'bold',
@@ -171,9 +171,9 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 摇杆位置 - 左下角 (竖屏)
+        // 摇杆位置 - 左下角 (竖屏，上移避免被屏幕底部遮挡)
         const joystickX = width * 0.22;
-        const joystickY = height * 0.88;
+        const joystickY = height * 0.78;
 
         // 摇杆底座 - 更大
         this.joystickBase = this.add.circle(joystickX, joystickY, 90, 0x333333, 0.5);
@@ -256,9 +256,9 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 射击按钮位置 - 右下角 (竖屏)
+        // 射击按钮位置 - 右下角 (竖屏，上移)
         const btnX = width * 0.78;
-        const btnY = height * 0.88;
+        const btnY = height * 0.78;
 
         // 射击按钮背景 - 更大
         this.shootBtnBg = this.add.circle(btnX, btnY, 70, 0xFF6B6B, 0.8);
@@ -346,9 +346,9 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 技能按钮位置 - 射击按钮上方 (竖屏布局)
+        // 技能按钮位置 - 射击按钮上方 (竖屏布局，上移)
         const btnX = width * 0.78;
-        const btnY = height * 0.72;
+        const btnY = height * 0.63;
 
         // 技能按钮背景 - 更大
         this.skillBtnBg = this.add.circle(btnX, btnY, 55, 0xFFD93D, 0.8);

@@ -544,8 +544,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 玩家限制在底部区域 - 竖屏适配，给控制按钮留出空间
         const screenH = this.scene.scale.height;
-        const topLimit = screenH * 0.45;  // 上方限制
-        const bottomLimit = screenH * 0.78;  // 下方限制（给按钮留空间）
+        const topLimit = screenH * 0.40;  // 上方限制
+        const bottomLimit = screenH * 0.68;  // 下方限制（给按钮留空间）
         
         if (this.y < topLimit) {
             this.y = topLimit;
